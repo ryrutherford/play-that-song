@@ -11,3 +11,17 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.song img {
+  position: absolute;
+  top: 0px;
+  left: -120px;
+  opacity: 0.4;
+  height: 200px;
+  width:200px;  
+}
+
+.song {
+  overflow: hidden;
+  padding-left: 80px;
+}
