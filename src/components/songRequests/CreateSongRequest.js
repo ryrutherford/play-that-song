@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
+import {createSongRequest} from '../../store/actions/songActions';
+import {connect} from 'react-redux';
 
 class CreateSongRequest extends Component {
   state = {
@@ -40,11 +42,10 @@ class CreateSongRequest extends Component {
             json: true
           };
           request.get(options, (error, response, body) => {
-            console.log(body);
+            console.log(body.tracks.items);
             this.setState({
               songs: body.tracks.items
             })
-            console.log(this.state);
           });
         }
       });
@@ -55,8 +56,14 @@ class CreateSongRequest extends Component {
     e.preventDefault();
     const songID = e.target.parentNode.parentNode.parentNode.id; //songID can be used to add a track to the request area
     document.getElementById('query').value='';
-    //songID can be used to add a track to the request area
-    console.log(songID);
+
+    //selecting the song that was requested by the user based on its ID
+    const songSelected = this.state.songs.filter(song => song.id === songID);
+    console.log(songSelected);
+    this.setState({
+      songs: songSelected
+    })
+    this.props.createSongRequest(this.state);
   }
 
   render() {
@@ -69,7 +76,7 @@ class CreateSongRequest extends Component {
             <div className="card-content">
               <span className="card-title green-text">{song.name}</span>
               <p className="grey-text">{"Song • " + song.artists.map(artist => artist.name).join(", ")}</p>
-              <p className="green-text"><a target="_blank" href={song.external_urls.spotify}>Play On Spotify</a></p>
+              <p className="green-text"><a target="_blank" rel="noreferrer noopener" href={song.external_urls.spotify}>Play On Spotify</a></p>
               <div className="input-field">
                 <button onClick={this.handleClick} className="btn green lighten-1 z-depth-0">Request Song</button>
               </div>
@@ -95,4 +102,12 @@ class CreateSongRequest extends Component {
   }
 }
 
-export default CreateSongRequest
+const mapDispatchToProps = (dispatch) => {
+  return {
+    createSongRequest: (songs) => {
+      dispatch(createSongRequest(songs));
+    }
+  }
+}
+
+export default connect(null, mapDispatchToProps)(CreateSongRequest)
