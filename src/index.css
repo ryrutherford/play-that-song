@@ -12,21 +12,6 @@ code {
     monospace;
 }
 
-
-.song img {
-  position: absolute;
-  top: 0px;
-  left: -120px;
-  opacity: 0.4;
-  height: 200px;
-  width:200px;  
-}
-
-.song {
-  overflow: hidden;
-  padding-left: 80px;
-}
-
 .song-with-album img {
   position: absolute;
   right:0px;
@@ -36,7 +21,7 @@ code {
 }
 
 .song-with-album p, span {
-  max-width: 70%;
+  max-width: 69%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

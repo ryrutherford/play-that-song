@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
+//import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
 import {createSongRequest} from '../../store/actions/songActions';
 import {connect} from 'react-redux';
 
@@ -71,8 +71,8 @@ class CreateSongRequest extends Component {
     const songList = songs.length ? (
       songs.map((song) => {
         return (
-          <div className="song card" id={song.id} key={song.id}>
-            <img src={SPOTIFY} alt="SPOTIFY LOGO"/>
+          <div className="song-with-album card" id={song.id} key={song.id}>
+            <img src={song.album.images[0].url} alt="Album Cover"/>
             <div className="card-content">
               <span className="card-title green-text">{song.name}</span>
               <p className="grey-text">{"Song • " + song.artists.map(artist => artist.name).join(", ")}</p>

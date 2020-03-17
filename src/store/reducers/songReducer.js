@@ -14,6 +14,12 @@ const songReducer = (state = initState, action) => {
     case 'CREATE_SONG_REQUEST_ERROR':
       console.log('create song request error', action.err);
       return state;
+    case 'UPDATE_SONG_REQUEST':
+      console.log('updated song request', action.songs);
+      return state;
+    case 'UPDATE_SONG_REQUEST_ERROR':
+      console.log('update song request error', action.err);
+      return state;
     default:
       return state;
   }
