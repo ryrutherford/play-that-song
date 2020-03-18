@@ -1,16 +1,25 @@
-import React from 'react';
+import React/*, { Profiler }*/ from 'react';
 import {NavLink} from 'react-router-dom';
+import {connect} from 'react-redux';
+import {signOut} from '../../store/actions/authActions';
 
-const SignedInLinks = () => {
+const SignedInLinks = (props) => {
   return (
     <ul className="right">
       <li><NavLink to='/'>New Session</NavLink></li>
       <li><NavLink to='/'>Join Session</NavLink></li>
       <li><NavLink to='/newSR'>New Song Request</NavLink></li>
-      <li><NavLink to='/'>Log Out</NavLink></li>
-      <li><NavLink to='/' className='btn btn-floating grey lighten-1'>AR</NavLink></li>
+      {/*eslint-disable-next-line*/}
+      <li><a onClick={props.signOut}>Sign Out</a></li>
+      <li><NavLink to='/' className='btn btn-floating grey lighten-1'>{props.profile.initials}</NavLink></li>
     </ul>
   );
 }
 
-export default SignedInLinks
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signOut: () => dispatch(signOut())
+  }
+}
+
+export default connect(null, mapDispatchToProps)(SignedInLinks)

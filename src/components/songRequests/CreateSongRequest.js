@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-//import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
-import {createSongRequest} from '../../store/actions/songActions';
+import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
+import {createSongRequest, clearError} from '../../store/actions/songActions';
 import {connect} from 'react-redux';
+import {Redirect} from 'react-router-dom';
 
 class CreateSongRequest extends Component {
   state = {
@@ -10,7 +11,7 @@ class CreateSongRequest extends Component {
 
   handleChange = (e) => {
     this.setState({
-      [e.target.id]: e.target.value
+      [e.target.id]: e.target.value,
     });
     let request = require('request'); // "Request" library
 
@@ -27,7 +28,6 @@ class CreateSongRequest extends Component {
       },
       json: true
     };
-    console.log(e.target.value);
     if(e.target.value){
       request.post(authOptions, (error, response, body) => {
         if (!error && response.statusCode === 200) {
@@ -42,7 +42,6 @@ class CreateSongRequest extends Component {
             json: true
           };
           request.get(options, (error, response, body) => {
-            console.log(body.tracks.items);
             this.setState({
               songs: body.tracks.items
             })
@@ -56,27 +55,32 @@ class CreateSongRequest extends Component {
     e.preventDefault();
     const songID = e.target.parentNode.parentNode.parentNode.id; //songID can be used to add a track to the request area
     document.getElementById('query').value='';
-
     //selecting the song that was requested by the user based on its ID
     const songSelected = this.state.songs.filter(song => song.id === songID);
-    console.log(songSelected);
+    this.props.createSongRequest({songs: songSelected}, this.props.history);
     this.setState({
-      songs: songSelected
-    })
-    this.props.createSongRequest(this.state);
+      songs: []
+    });
   }
 
   render() {
+    const {auth, reqError} = this.props;
+    if (!auth.uid){
+      return <Redirect to="/signin"/>
+    }
     const songs = this.state.songs;
     const songList = songs.length ? (
       songs.map((song) => {
         return (
-          <div className="song-with-album card" id={song.id} key={song.id}>
-            <img src={song.album.images[0].url} alt="Album Cover"/>
+          <div className="create-requests card" id={song.id} key={song.id}>
+            <div className="song-with-album"><img src={song.album.images[0].url} alt="Album Cover"/></div>
+            <div className="spotify"><img src={SPOTIFY} alt="Spotify Logo"/></div>
             <div className="card-content">
               <span className="card-title green-text">{song.name}</span>
               <p className="grey-text">{"Song • " + song.artists.map(artist => artist.name).join(", ")}</p>
-              <p className="green-text"><a target="_blank" rel="noreferrer noopener" href={song.external_urls.spotify}>Play On Spotify</a></p>
+              <p className="green-text">
+                <a target="_blank" rel="noreferrer noopener" title="Play on Spotify" href={song.external_urls.spotify}>Play On Spotify</a>
+              </p>
               <div className="input-field">
                 <button onClick={this.handleClick} className="btn green lighten-1 z-depth-0">Request Song</button>
               </div>
@@ -84,30 +88,45 @@ class CreateSongRequest extends Component {
           </div>
         )
       })
-    ) : (
-      <div className="center">Search by song name to display results</div>
-    )
+    ) : (null)
     return (
       <div className="container">
         <form className="white">
           <h5 className="grey-text text-darken-3">Search Songs</h5>
           <div className="input-field green-text">
-            <label htmlFor="query">Song Title</label>
-            <input type="text" id="query" onChange={this.handleChange}/>
+            <input type="text" id="query" onChange={this.handleChange} placeholder="Search by song name to display results"/>
           </div>
           {songList}
         </form>
+        {reqError ? 
+        (<div className="msg-container">
+          <div className="msg msg-error z-depth-3 scale-transition center">
+            <p>{reqError}</p>
+            <button onClick={this.props.clearError} className="white lighten-1 z-depth-0">OK</button>
+          </div>
+         </div>) : (null)}
       </div>
     )
   }
 }
 
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    reqError: state.song.reqError
+  }
+}
+
 const mapDispatchToProps = (dispatch) => {
   return {
-    createSongRequest: (songs) => {
-      dispatch(createSongRequest(songs));
+    createSongRequest: (songs, history) => {
+      console.log(songs)
+      dispatch(createSongRequest(songs, history));
+    },
+    clearError: () => {
+      dispatch(clearError());
     }
   }
 }
 
-export default connect(null, mapDispatchToProps)(CreateSongRequest)
+export default connect(mapStateToProps, mapDispatchToProps)(CreateSongRequest)

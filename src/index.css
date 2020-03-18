@@ -12,6 +12,19 @@ code {
     monospace;
 }
 
+.spotify img {
+  position: absolute;
+  left: -120px;
+  opacity: 0.4;
+  height: 100%;
+  max-width: 100%;  
+}
+
+.create-requests {
+  overflow: hidden;
+  padding-left: 80px;
+}
+
 .song-with-album img {
   position: absolute;
   right:0px;
@@ -26,3 +39,20 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.msg-container {
+  text-align: center;
+}
+.msg {
+  max-width:50%;
+  border: 1px solid;
+  padding:25px;
+  color: grey;
+  display: inline-block;
+}
+.msg-error {
+  border-color: #d32f2f;
+  background-color: #ef5350;
+  color: white;
+}
+
