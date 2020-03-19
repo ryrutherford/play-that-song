@@ -45,6 +45,15 @@ const songReducer = (state = initState, action) => {
         ...state,
         reqError: null
       }
+    case 'UNDO_SONG_REQUEST':
+      console.log('undo song request', action.songs);
+      return state;
+    case 'UNDO_SONG_REQUEST_ERROR':
+      console.log('undo song request error', action.songs);
+      return {
+        ...state,
+        reqError: action.err
+      }
     default:
       return state;
   }

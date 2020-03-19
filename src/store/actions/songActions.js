@@ -23,7 +23,7 @@ export const createSongRequest = (songs, history) => {
 
     //the first action is to get a document in the collection that has the same songID as the song that was requested
     firestore.collection('songRequests').where("songID", "==", song.id).get()
-      .then(function(querySnapshot) {
+      .then((querySnapshot) => {
         querySnapshot.forEach(function(doc) {
           // doc.data() is never undefined for query doc snapshots
           if (doc.data().songID === song.id){
@@ -51,8 +51,8 @@ export const createSongRequest = (songs, history) => {
           }).then(() => {
             history.push("/");
             dispatch({type: 'CREATE_SONG_REQUEST', songs});
-          }).catch((err) => {
-            dispatch({type: 'CREATE_SONG_REQUEST_ERROR', err});
+          }).catch((error) => {
+            dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
           });
         }
         //if the numRequests is > 0 then the song has already been requested
@@ -64,8 +64,8 @@ export const createSongRequest = (songs, history) => {
           }).then(() => {
             history.push("/");
             dispatch({type: 'UPDATE_SONG_REQUEST', songs});
-          }).catch((err) => {
-            dispatch({type: 'UPDATE_SONG_REQUEST_ERROR', err});
+          }).catch((error) => {
+            dispatch({type: 'UPDATE_SONG_REQUEST_ERROR', error});
           });
         }
         else {
@@ -74,19 +74,90 @@ export const createSongRequest = (songs, history) => {
           dispatch({type: 'ALREADY_REQUESTED', err});
         }
       })
-    .catch((err) => {
-      console.log("song request error", err);
-      dispatch({type: 'SONG_REQUEST_ERROR', err});
+    .catch((error) => {
+      console.log("song request error", error);
+      dispatch({type: 'SONG_REQUEST_ERROR', error});
     })
-    .catch((err) => {
-      console.log("Error getting documents: ", err);
-      dispatch({type: 'GET_DOCUMENT_ERROR', err});
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
+      dispatch({type: 'GET_DOCUMENT_ERROR', error});
     })
   };
 };
 
 export const clearError = () => {
   return (dispatch, getState) => {
-    dispatch({type: 'CLEAR_ERROR'})
+    dispatch({type: 'CLEAR_ERROR'});
+  }
+}
+
+export const undoRequest = (songID, userID) => {
+  return (dispatch, getState, {getFirestore}) => {
+    //the database
+    const firestore = getFirestore();
+    console.log(songID, userID);
+    //getting the song that had this songID
+    firestore.collection('songRequests').where("songID", "==", songID).get()
+      .then((querySnapshot) => {
+        console.log(querySnapshot);
+        //there should be only 1 document but we use a forEach to access it
+        querySnapshot.forEach((doc) => {
+          
+          //the docID will be used for update or delete
+          let docID = doc.id;
+
+          //if there is only 1 request we must delete the entry from the database
+          if(doc.data().numRequests === 1){
+            firestore.collection('songRequests').doc(docID).delete().then(() => {
+              dispatch({type: 'UNDO_SONG_REQUEST'});
+            }).catch(function(error) {
+              dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
+            });
+          }
+
+          //if there are multiple requests we must remove one request and remove the user's ID from the requestors array
+          else{
+            firestore.collection('songRequests').doc(docID).update({
+              numRequests: doc.data().numRequests - 1,
+              requestors: doc.data().requestors.filter((requestor) => requestor !== userID)
+            }).then(() => {
+              //history.push("/");
+              dispatch({type: 'UNDO_SONG_REQUEST'});
+            }).catch((error) => {
+              dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
+            });
+          }
+        })
+      })
+      .catch((error) => {
+        dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error})
+      })
+  }
+}
+
+//an action that will create a song request from the dashboard
+export const createSongRequestFromDashboard = (songID, userID) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const firestore = getFirestore();
+    firestore.collection('songRequests').where("songID", "==", songID).get()
+    .then((querySnapshot) => {
+      //there should be only 1 document but we use a forEach to access it
+      querySnapshot.forEach((doc) => {
+        
+        //the docID will be used for update or delete
+        let docID = doc.id;
+        firestore.collection('songRequests').doc(docID).update({
+          numRequests: doc.data().numRequests + 1,
+          requestors: [...doc.data().requestors, userID]
+        }).then(() => {
+          dispatch({type: 'CREATE_SONG_REQUEST'});
+        }).catch((error) => {
+          dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
+        });
+      })
+    })
+    .catch((error) => {
+      dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error})
+    })
   }
 }

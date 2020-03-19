@@ -102,7 +102,7 @@ class CreateSongRequest extends Component {
         (<div className="msg-container">
           <div className="msg msg-error z-depth-3 scale-transition center">
             <p>{reqError}</p>
-            <button onClick={this.props.clearError} className="white lighten-1 z-depth-0">OK</button>
+            <button onClick={this.props.clearError} className="btn white lighten-1 z-depth-0">OK</button>
           </div>
          </div>) : (null)}
       </div>

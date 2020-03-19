@@ -56,3 +56,12 @@ code {
   color: white;
 }
 
+.notifications {
+  white-space: initial;
+}
+
+hr {
+  border: 2px solid green;
+  border-radius: 1px
+}
+

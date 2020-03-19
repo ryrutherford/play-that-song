@@ -9,7 +9,7 @@ import {Redirect} from 'react-router-dom';
 class Dashboard extends Component {
   render() {
     //console.log(this.props);
-    const {songs, auth} = this.props;
+    const {songs, auth, notifications} = this.props;
     if(!auth.uid) {
       return <Redirect to="/signin"/>
     }
@@ -21,7 +21,7 @@ class Dashboard extends Component {
             <SongRequestList songs={songs}/>
           </div>
           <div className="col s12 m5 offset-m1">
-            <Notifications/>
+            <Notifications notifications={notifications}/>
           </div>
         </div>
       </div>
@@ -33,13 +33,15 @@ const mapStateToProps = (state) => {
   console.log(state);
   return {
     songs: state.firestore.ordered.songRequests,
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    notifications: state.firestore.ordered.notifications
   }
 }
 
 export default compose(
   connect(mapStateToProps),
   firestoreConnect([
-    {collection: 'songRequests'}
+    {collection: 'songRequests', orderBy: ['numRequests', 'desc']},
+    {collection: 'notifications', limit: 5, orderBy: ['time', 'desc']}
   ])
 )(Dashboard)
