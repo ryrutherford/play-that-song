@@ -1,5 +1,3 @@
-
-
 export const createSongRequest = (songs, history) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
 
@@ -88,6 +86,42 @@ export const createSongRequest = (songs, history) => {
 export const clearError = () => {
   return (dispatch, getState) => {
     dispatch({type: 'CLEAR_ERROR'});
+  }
+}
+
+export const deleteNotifications = () => {
+  return (dispatch, getState, {getFirestore}) => {
+    
+    const firestore = getFirestore();
+
+    //the notifications will be retrieved ordered in ascending order by data created
+    firestore.collection('notifications').orderBy('time').get()
+    .then((querySnapshot) => {
+      let numNotifs = querySnapshot.size;
+      let i = 0; //used to check if any notifs were deleted and as a counter for deleting notifs
+
+      //if there are more than 500 notifications in the notifications collection we must:
+      //delete the oldest notifications until only 5 remain
+      if(numNotifs >= 500){
+        querySnapshot.forEach((doc) => {
+          if(i < numNotifs - 5){
+            //deleting the documents
+            firestore.collection('notifications').doc(doc.id).delete()
+              .then(() => {
+                console.log("document deleted");
+              })
+              .catch((error) => {
+                dispatch({type:'DELETE_NOTIF_ERROR', error});
+              })
+            i++;
+          }
+        })
+      }
+      if(i !== 0) dispatch({type: 'DELETE_NOTIF'});
+    })
+    .catch((error) => {
+      dispatch({type: 'DELETE_NOTIF_ERROR', error})
+    })
   }
 }
 

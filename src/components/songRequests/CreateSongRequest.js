@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
-import {createSongRequest, clearError} from '../../store/actions/songActions';
+import {createSongRequest, clearError, deleteNotifications} from '../../store/actions/songActions';
 import {connect} from 'react-redux';
 import {Redirect} from 'react-router-dom';
 
@@ -58,6 +58,7 @@ class CreateSongRequest extends Component {
     //selecting the song that was requested by the user based on its ID
     const songSelected = this.state.songs.filter(song => song.id === songID);
     this.props.createSongRequest({songs: songSelected}, this.props.history);
+    this.props.deleteNotifications();
     this.setState({
       songs: []
     });
@@ -77,7 +78,7 @@ class CreateSongRequest extends Component {
             <div className="spotify"><img src={SPOTIFY} alt="Spotify Logo"/></div>
             <div className="card-content">
               <span className="card-title green-text">{song.name}</span>
-              <p className="grey-text">{"Song • " + song.artists.map(artist => artist.name).join(", ")}</p>
+              <p className="black-text">{"Song • " + song.artists.map(artist => artist.name).join(", ")}</p>
               <p className="green-text">
                 <a target="_blank" rel="noreferrer noopener" title="Play on Spotify" href={song.external_urls.spotify}>Play On Spotify</a>
               </p>
@@ -88,11 +89,11 @@ class CreateSongRequest extends Component {
           </div>
         )
       })
-    ) : (null)
+    ) : (null);
     return (
       <div className="container">
         <form className="white">
-          <h5 className="grey-text text-darken-3">Search Songs</h5>
+          <h5 className="black-text text-darken-3">Search Songs</h5>
           <div className="input-field green-text">
             <input type="text" id="query" onChange={this.handleChange} placeholder="Search by song name to display results"/>
           </div>
@@ -102,7 +103,7 @@ class CreateSongRequest extends Component {
         (<div className="msg-container">
           <div className="msg msg-error z-depth-3 scale-transition center">
             <p>{reqError}</p>
-            <button onClick={this.props.clearError} className="btn white lighten-1 z-depth-0">OK</button>
+            <button onClick={this.props.clearError} className="btn white red-text lighten-1 z-depth-0">OK</button>
           </div>
          </div>) : (null)}
       </div>
@@ -125,6 +126,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     clearError: () => {
       dispatch(clearError());
+    },
+    deleteNotifications: () => {
+      dispatch(deleteNotifications());
     }
   }
 }

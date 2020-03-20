@@ -2,10 +2,6 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello from Firebase!");
-});
-
 const createNotification = (notification) => {
   return admin.firestore().collection('notifications')
     .add(notification)
@@ -14,7 +10,7 @@ const createNotification = (notification) => {
 
 exports.songRequested = functions.firestore
   .document('songRequests/{songRequestID}')
-  .onWrite((doc) => {
+  .onWrite((doc, context) => {
     //the song request after the change (update, create, or delete)
     let songRequestAfter = doc.after.exists ? doc.after.data() : null;
     //the song request before the change (update, create, delete)
@@ -48,4 +44,5 @@ exports.songRequested = functions.firestore
       }
     }
     //otherwise the request was deleted and we don't do anything
+    return null;
 })

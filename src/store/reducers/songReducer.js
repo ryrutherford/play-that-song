@@ -46,10 +46,19 @@ const songReducer = (state = initState, action) => {
         reqError: null
       }
     case 'UNDO_SONG_REQUEST':
-      console.log('undo song request', action.songs);
+      console.log('undo song request');
       return state;
     case 'UNDO_SONG_REQUEST_ERROR':
-      console.log('undo song request error', action.songs);
+      console.log('undo song request error');
+      return {
+        ...state,
+        reqError: action.err
+      }
+    case 'DELETE_NOTIF':
+      console.log('DELETE NOTIF');
+      return state;
+    case 'DELETE_NOTIF_ERROR':
+      console.log('DELETE NOTIF error', action.error);
       return {
         ...state,
         reqError: action.err

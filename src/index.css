@@ -34,7 +34,7 @@ code {
 }
 
 .song-with-album p, span {
-  max-width: 69%;
+  max-width: 61%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -57,6 +57,10 @@ code {
 }
 
 .notifications {
+  white-space: initial;
+}
+
+.break-line {
   white-space: initial;
 }
 

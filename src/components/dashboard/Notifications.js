@@ -5,9 +5,10 @@ const Notifications = (props) => {
   const {notifications} = props;
   return (
     <div className="section">
+      <h3 className="green-text">Notifications</h3>
       <div className="card">
         <div className="card-content">
-          <span className="card-title green-text">Notifications</span>
+          
           <ul>
             {notifications && notifications.map((item) => {
               return (
@@ -21,7 +22,7 @@ const Notifications = (props) => {
               );
             })}
           </ul>
-          <span className="grey-text notifications"><i>{notifications !== [] ? null : "No new notifications"}</i></span>
+          <span className="black-text notifications"><i>{notifications !== [] ? null : "No new notifications"}</i></span>
         </div>
       </div>
     </div>

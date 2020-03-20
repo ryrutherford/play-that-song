@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import {undoRequest, createSongRequestFromDashboard} from '../../store/actions/songActions';
+import {undoRequest, createSongRequestFromDashboard, deleteNotifications} from '../../store/actions/songActions';
 
 class SongRequestSummary extends Component {
   handleClickUndo = (e) => {
@@ -10,6 +10,7 @@ class SongRequestSummary extends Component {
   handleClickRequest = (e) => {
     e.preventDefault();
     this.props.createSongRequestFromDashboard(e.target.id, this.props.auth.uid);
+    this.props.deleteNotifications();
   }
   render(){
     const {auth, song} = this.props;
@@ -20,8 +21,8 @@ class SongRequestSummary extends Component {
         <span className="card-title green-text">
         <a target="_blank" rel="noreferrer noopener" title="Play on Spotify" href={song.externalURL} className="green-text">{song.title}</a>
         </span>
-        <p className="grey-text">{"Song • " + song.artists.join(", ")}</p>
-        <p className="grey-text">
+        <p className="black-text">{"Song • " + song.artists.join(", ")}</p>
+        <p className="black-text">
           <b>{song.numRequests === 1 ? (song.numRequests + " Request") : (song.numRequests + " Requests")}</b>
         </p>
         {song.requestors.includes(auth.uid) ? (
@@ -46,8 +47,8 @@ const SongRequestSummary = ({auth, song}) => {
         <span className="card-title green-text">
         <a target="_blank" rel="noreferrer noopener" title="Play on Spotify" href={song.externalURL} className="green-text">{song.title}</a>
         </span>
-        <p className="grey-text">{"Song • " + song.artists.join(", ")}</p>
-        <p className="grey-text"><b>{song.numRequests === 1 ? (song.numRequests + " Request") : (song.numRequests + " Requests")}</b></p>
+        <p className="black-text">{"Song • " + song.artists.join(", ")}</p>
+        <p className="black-text"><b>{song.numRequests === 1 ? (song.numRequests + " Request") : (song.numRequests + " Requests")}</b></p>
         {song.requestors.includes(auth.uid) ? (
           <button onClick={handleClick} id={song.id} className="btn green lighten-1 z-depth-0">Undo Request</button>
         ) :
@@ -70,6 +71,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     undoRequest: (songID, userID) => {
       dispatch(undoRequest(songID, userID))
+    },
+    deleteNotifications: () => {
+      dispatch(deleteNotifications());
     }
   }
 }

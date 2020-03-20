@@ -1,4 +1,4 @@
-import React/*, { Profiler }*/ from 'react';
+import React from 'react';
 import {NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {signOut} from '../../store/actions/authActions';
@@ -6,8 +6,10 @@ import {signOut} from '../../store/actions/authActions';
 const SignedInLinks = (props) => {
   return (
     <ul className="right">
-      <li><NavLink to='/'>New Session</NavLink></li>
-      <li><NavLink to='/'>Join Session</NavLink></li>
+      <li><NavLink to='/about'>About</NavLink></li>
+      {/*<li><NavLink to='/newSession'>New Session</NavLink></li>
+      <li><NavLink to='/joinSession'>Join Session</NavLink></li>*/}
+      <li><NavLink to='/sessions'>Sessions</NavLink></li>
       <li><NavLink to='/newSR'>New Song Request</NavLink></li>
       {/*eslint-disable-next-line*/}
       <li><a onClick={props.signOut}>Sign Out</a></li>
