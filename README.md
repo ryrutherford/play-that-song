@@ -11,7 +11,7 @@
 3. Navigate to your new session by clicking on the link titled "Session ID: {Your New Session ID}"
 4. Click on the "Create Song Request" button in the middle of the page
 5. Search for a song you would like to request, when it appears click "Request Song"
-6. You have requested your first song! Your request can be undone by clicking on the "Undo Request" button that appears beneath your new request
+6. You have requested your first song! Your request can be undone by clicking on the "Undo Request" button that appears beneath your new request. You can open the song in Spotify by clicking on the song title
 7. To allow other users to make requests share the code or link to your session with them. You can also join other users sessions by entering their code in the "Join Session" fields on the Sessions page
 
 ### Example Song Request Session
