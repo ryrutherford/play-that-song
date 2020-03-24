@@ -57,9 +57,9 @@ class ActiveSession extends Component {
             <div className="card">
               <div className="card-content break-line">
                 <p className="card-title green-text center"><b>Session {sessionID}</b></p>
-                <p className="black-text center">Share this code <b>{sessionID}</b> or this link <a href={"http://localhost:3000/activeSession/" + sessionID}>{"http://localhost:3000/activeSession/" + sessionID}</a> with people to allow them to make requests</p>
+                <p className="black-text center">Share this code <b>{sessionID}</b> or this link <a href={"https://play-that-song-fac18.firebaseapp.com/activeSession/" + sessionID}>{"https://play-that-song-fac18.firebaseapp.com/activeSession/" + sessionID}</a> with people to allow them to make requests</p>
                 <br/>
-                <p className="black-text center">Navigate to <a href={"http://localhost:3000/activeSession/" + sessionID}>{"http://localhost:3000/activeSession/" + sessionID}</a> to start requesting songs or go to <a href="https://localhost:3000/sessions">https://localhost:3000/sessions</a> to check out your other active sessions</p>
+                <p className="black-text center">Navigate to <a href={"https://play-that-song-fac18.firebaseapp.com/activeSession/" + sessionID}>{"https://play-that-song-fac18.firebaseapp.com/activeSession/" + sessionID}</a> to start requesting songs or go to <a href="https://play-that-song-fac18.firebaseapp.com/sessions">https://play-that-song-fac18.firebaseapp.com/sessions</a> to check out your other active sessions</p>
                 <div className="srButton">
                   <button onClick={() => this.props.history.push("/activeSession/" + sessionID + "/createSR")} className="btn green center lighten-1 z-depth-0">Create Song Request</button>
                 </div>

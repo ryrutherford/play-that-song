@@ -126,7 +126,7 @@ class Sessions extends Component {
                     this.getSessions() && this.getSessions().length !== 0 ? (this.getSessions().map((session) => {
                       return(
                         <div key={session.sessionID}>
-                          <span className="green-text card-title"><a href={"http://localhost:3000/activeSession/" + session.sessionID}>Session ID: {session.sessionID}</a></span>
+                          <span className="green-text card-title"><a href={"https://play-that-song-fac18.firebaseapp.com/activeSession/" + session.sessionID}>Session ID: {session.sessionID}</a></span>
                           <button className="btn green lighten-1 z-depth-0" id={session.sessionID} onClick={this.deleteSession}>Delete Session</button>
                           <hr/>
                         </div>
