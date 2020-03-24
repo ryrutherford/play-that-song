@@ -11,6 +11,13 @@ const sessionReducer = (state = initState, action) => {
         ...state,
         sessError: action.error
       }
+    case 'DELETE_SESSION':
+      return state;
+    case 'DELETE_SESSION_ERROR':
+      return {
+        ...state,
+        sessError: action.error
+      }
     default:
       return state
   }

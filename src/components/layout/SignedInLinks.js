@@ -7,8 +7,6 @@ const SignedInLinks = (props) => {
   return (
     <ul className="right">
       <li><NavLink to='/about'>About</NavLink></li>
-      {/*<li><NavLink to='/newSession'>New Session</NavLink></li>
-      <li><NavLink to='/joinSession'>Join Session</NavLink></li>*/}
       <li><NavLink to='/sessions'>Sessions</NavLink></li>
       <li><NavLink to='/newSR'>New Song Request</NavLink></li>
       {/*eslint-disable-next-line*/}

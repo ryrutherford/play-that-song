@@ -1,12 +1,32 @@
 import React, { Component } from 'react';
 import SPOTIFY from 'C:/Users/Ry Rutherford/Documents/JavaScript Projects/Dev/play-that-song/src/img/spotify.png';
-import {createSongRequest, clearError, deleteNotifications} from '../../store/actions/songActions';
+import {requestSong, clearError, deleteNotifications} from '../../store/actions/songActions';
 import {connect} from 'react-redux';
 import {Redirect} from 'react-router-dom';
+import {firestoreConnect, isLoaded} from 'react-redux-firebase';
+import {compose} from 'redux';
 
-class CreateSongRequest extends Component {
+class RequestSong extends Component {
   state = {
     songs: []
+  }
+
+  isValidURL = () => {
+    const {songRequestSessions, sessionID} = this.props;
+    let sessionExists = false;
+    if(isLoaded(songRequestSessions)){
+      for(let i in songRequestSessions){
+        if(songRequestSessions[i].session.sessionID === parseInt(sessionID)){
+          sessionExists = true;
+          break;
+        }
+      }
+      if(!sessionExists){
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   handleChange = (e) => {
@@ -52,22 +72,26 @@ class CreateSongRequest extends Component {
   }
 
   handleClick = (e) => {
+    const {requestSong, deleteNotifications, sessionID} = this.props;
     e.preventDefault();
     const songID = e.target.parentNode.parentNode.parentNode.id; //songID can be used to add a track to the request area
     document.getElementById('query').value='';
     //selecting the song that was requested by the user based on its ID
     const songSelected = this.state.songs.filter(song => song.id === songID);
-    this.props.createSongRequest({songs: songSelected}, this.props.history);
-    this.props.deleteNotifications();
+    requestSong({songs: songSelected}, this.props.history, sessionID);
+    deleteNotifications();
     this.setState({
       songs: []
     });
   }
 
   render() {
-    const {auth, reqError} = this.props;
+    const {auth, reqError, songRequestSessions} = this.props;
     if (!auth.uid){
       return <Redirect to="/signin"/>
+    }
+    if(isLoaded(songRequestSessions) && this.isValidURL() === false){
+      return <Redirect to='/sessions'/>
     }
     const songs = this.state.songs;
     const songList = songs.length ? (
@@ -111,18 +135,20 @@ class CreateSongRequest extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+  let sessionID = ownProps.match.params.session_id;
   return {
     auth: state.firebase.auth,
-    reqError: state.song.reqError
+    reqError: state.song.reqError,
+    songRequestSessions: state.firestore.data.songRequestSessions,
+    sessionID
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    createSongRequest: (songs, history) => {
-      console.log(songs)
-      dispatch(createSongRequest(songs, history));
+    requestSong: (songs, history, sessionID) => {
+      dispatch(requestSong(songs, history, sessionID));
     },
     clearError: () => {
       dispatch(clearError());
@@ -133,4 +159,7 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateSongRequest)
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  firestoreConnect([{collection: 'songRequestSessions'}]))
+  (RequestSong)

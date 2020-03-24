@@ -4,38 +4,39 @@ import {firestoreConnect, isLoaded} from 'react-redux-firebase';
 import {compose} from 'redux';
 import {Redirect} from 'react-router-dom';
 import Notifications from '../dashboard/Notifications';
-import {createSession} from '../../store/actions/sessionActions';
+import {createSession, deleteSession} from '../../store/actions/sessionActions';
 
 class Sessions extends Component {
   state = {
-    joinSessionError: null
+    joinSessionError: null,
+    path: null
   }
+  
   //returns the signed in users active sessions
   getSessions = () => {
     const {songRequestSessions, auth} = this.props;
     let sessionArr = [];
     if(isLoaded(songRequestSessions)){
       for(let i in songRequestSessions){
-        if(songRequestSessions[i].creatorID === auth.uid){
-          sessionArr.push(songRequestSessions[i].session)
+        if(songRequestSessions[i] !== null){
+          if(songRequestSessions[i].creatorID === auth.uid){
+            sessionArr.push(songRequestSessions[i].session)
+          }
         }
       }
-      console.log(sessionArr, "session array");
       return sessionArr;
     }
   }
 
   //function that initiates the joining of a session
   joinSession = (e) => {
-    const {songRequestSessions, history} = this.props;
+    const {songRequestSessions} = this.props;
     e.preventDefault();
     let sessionID = e.target.elements[0].value;
     if(isLoaded(songRequestSessions)){
       let sessionExists = false;
       for(let i in songRequestSessions){
-        console.log(songRequestSessions[i].session.sessionID, sessionID, "comparison");
-        if(songRequestSessions[i].session.sessionID === sessionID){
-          console.log("comp true");
+        if(songRequestSessions[i].session.sessionID === parseInt(sessionID, 10)){
           sessionExists = true;
           break;
         }
@@ -43,7 +44,8 @@ class Sessions extends Component {
 
       //if the session was found in songRequestSessions then we will redirect the user to that session
       if(sessionExists){
-        history.push("/activeSession/" + sessionID);
+        let path = "/activeSession/" + sessionID;
+        this.setState({path});
       }
       else{
         this.setState({
@@ -55,7 +57,7 @@ class Sessions extends Component {
 
   //function that creates a new session
   newSession = () => {
-    const {songRequestSessions, createSession, history} = this.props;
+    const {songRequestSessions, createSession} = this.props;
     if(isLoaded(songRequestSessions)){
       //the random sessionID will be the new session's identifier code
       let sessionID = Math.floor(100000 + Math.random() * 900000);
@@ -63,7 +65,6 @@ class Sessions extends Component {
       //songRequestSessions is an array of sessions retrieved from firestore, it will be undefined initially
       let tryAgain = false;
       for(let i in songRequestSessions){
-        console.log(songRequestSessions[i].session.sessionID, sessionID, "comparison");
         if(songRequestSessions[i].session.sessionID === sessionID){
           tryAgain = true;
           break;
@@ -82,15 +83,24 @@ class Sessions extends Component {
           }
         }
       }
-      console.log(sessionID,"dispatching action")
       createSession(this.props.auth.uid, sessionID);
-      history.push("/activeSession/" + sessionID);
     }
   }
+
+  //code for deleting a session, updates the database and removes the session from firestore
+  deleteSession = (e) => {
+    e.preventDefault()
+    const sessionID = e.target.id;
+    this.props.deleteSession(sessionID);
+  }
+
   render(){
     const {auth, notifications} = this.props;
     if(!auth.uid) {
-      return <Redirect to='/about'/>
+      return <Redirect to='/about'/>;
+    }
+    if(this.state.path){
+      return <Redirect to={this.state.path}/>;
     }
     return (
       <div className="container">
@@ -113,11 +123,11 @@ class Sessions extends Component {
                   </div>
                   <h5 className="black-text text-darken-3">Active Sessions</h5>
                   {
-                    this.getSessions() ? (this.getSessions().map((session) => {
+                    this.getSessions() && this.getSessions().length !== 0 ? (this.getSessions().map((session) => {
                       return(
                         <div key={session.sessionID}>
-                          <span className="green-text card-title">Session ID: {session.sessionID}</span>
-                          <a href={"http://localhost:3000/activeSession/" + session.sessionID}>View Session</a>
+                          <span className="green-text card-title"><a href={"http://localhost:3000/activeSession/" + session.sessionID}>Session ID: {session.sessionID}</a></span>
+                          <button className="btn green lighten-1 z-depth-0" id={session.sessionID} onClick={this.deleteSession}>Delete Session</button>
                           <hr/>
                         </div>
                       )
@@ -148,6 +158,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     createSession: (userID, sessionID) => {
       dispatch(createSession(userID, sessionID));
+    },
+    deleteSession: (sessionID) => {
+      dispatch(deleteSession(sessionID));
     }
   }
 }

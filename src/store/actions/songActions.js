@@ -1,6 +1,5 @@
-export const createSongRequest = (songs, history) => {
+export const requestSong = (songs, history, sessionID) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
-
     /*
       firestore: a constant that is connected to the firestore database
       song: a constant that represents the song that was requested by a user
@@ -11,77 +10,90 @@ export const createSongRequest = (songs, history) => {
       alreadyRequested: a boolean that indicates whether the user has already requested this song
     */
 
-    const firestore = getFirestore();
-    const song = songs.songs[0];
-    let numRequests = 0;
-    let docID = null;
-    const requestorID = getState().firebase.auth.uid;
-    let requestors = [];
-    let alreadyRequested = false;
+   const firestore = getFirestore();
+   const song = songs.songs[0];
+   let numRequests = 0;
+   let docID = null;
+   const requestorID = getState().firebase.auth.uid;
+   let requestors = [];
+   let alreadyRequested = false;
+   let songIndex = null;
+   let songRequests = null; //used to update the database with the new/updated sr
 
-    //the first action is to get a document in the collection that has the same songID as the song that was requested
-    firestore.collection('songRequests').where("songID", "==", song.id).get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          if (doc.data().songID === song.id){
-            //console.log(doc.id, " => ", doc.data());
-            docID = doc.id;
-            numRequests = doc.data().numRequests + 1;
-            requestors = doc.data().requestors;
+
+   //the first action is to get a document in the collection that has the same songID as the song that was requested
+   firestore.collection('songRequestSessions').where("session.sessionID", "==", parseInt(sessionID)).get()
+     .then((querySnapshot) => {
+       querySnapshot.forEach((doc) => {
+         // doc.data() is never undefined for query doc snapshots
+         let session = doc.data().session;
+         docID = doc.id;
+         //iterating through all the songRequests in the session
+         songRequests = session.songRequests;
+         songRequests.forEach((songRequest, index) => {
+          if(songRequest.songID === song.id){
+            songIndex = index; //used to identify which index in the songRequests array the song is
+            numRequests = songRequest.numRequests + 1;
+            requestors = songRequest.requestors;
             if (requestors.includes(requestorID)) alreadyRequested = true;
           }
-        });
-      })
-      //the next step is to either add a new doc to the collection (song hasn't been requested yet) or update the numRequests of the existing doc
-      .then(() => {
-        //if the numRequests is 0 then the song hasn't been requested before, we must add a new song (doc) to firestore
-        if (numRequests === 0){
-          numRequests = 1;
-          firestore.collection('songRequests').add({
-            title: song.name,
-            artists: song.artists.map(artist => artist.name),
-            externalURL: song.external_urls.spotify,
-            songID: song.id,
-            requestors: [...requestors, requestorID],
-            albumIMGURL: song.album.images[0].url,
-            numRequests
-          }).then(() => {
-            history.push("/");
-            dispatch({type: 'CREATE_SONG_REQUEST', songs});
-          }).catch((error) => {
-            dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
-          });
-        }
-        //if the numRequests is > 0 then the song has already been requested
-        //and we must update the doc to reflect the new request as long as the user hasn't already requested the song
-        else if (alreadyRequested === false){
-          firestore.collection('songRequests').doc(docID).update({
-            numRequests,
-            requestors: [...requestors, requestorID]
-          }).then(() => {
-            history.push("/");
-            dispatch({type: 'UPDATE_SONG_REQUEST', songs});
-          }).catch((error) => {
-            dispatch({type: 'UPDATE_SONG_REQUEST_ERROR', error});
-          });
-        }
-        else {
-          //we dispatch an action indicating the the song has already been requested
-          let err = 'You have already requested this song.'
-          dispatch({type: 'ALREADY_REQUESTED', err});
-        }
-      })
-    .catch((error) => {
-      console.log("song request error", error);
-      dispatch({type: 'SONG_REQUEST_ERROR', error});
-    })
-    .catch((error) => {
-      console.log("Error getting documents: ", error);
-      dispatch({type: 'GET_DOCUMENT_ERROR', error});
-    })
-  };
-};
+         })
+       });
+     })
+     //the next step is to either add a new songRequest to the session.songRequests array (song hasn't been requested yet) or update the numRequests of the existing songRequest
+     .then(() => {
+       //if the numRequests is 0 then the song hasn't been requested before, we must add a new song to the array
+       if (numRequests === 0){
+        numRequests = 1;
+        //pushing the new song request to the songRequests array that is a copy of the songRequests in the session doc in firestore
+        songRequests.push({
+          title: song.name,
+          artists: song.artists.map(artist => artist.name),
+          externalURL: song.external_urls.spotify,
+          songID: song.id,
+          requestors: [...requestors, requestorID],
+          albumIMGURL: song.album.images[0].url,
+          numRequests
+        })
+        //updating the collection to reflect the change to the songRequests
+        firestore.collection('songRequestSessions').doc(docID).update({
+          "session.songRequests": songRequests
+        })
+        .then(() => {
+           history.push("/activeSession/" + sessionID);
+           dispatch({type: 'CREATE_SONG_REQUEST', songs});
+         }).catch((error) => {
+           dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
+         });
+       }
+       //if the numRequests is > 0 then the song has already been requested
+       //and we must update the doc to reflect the new request as long as the user hasn't already requested the song
+       else if (alreadyRequested === false){
+         songRequests[songIndex].numRequests = numRequests;
+         songRequests[songIndex].requestors = [...requestors, requestorID];
+         firestore.collection('songRequestSessions').doc(docID).update({
+           "session.songRequests": songRequests
+         }).then(() => {
+           history.push("/activeSession/" + sessionID);
+           dispatch({type: 'UPDATE_SONG_REQUEST', songs});
+         }).catch((error) => {
+           dispatch({type: 'UPDATE_SONG_REQUEST_ERROR', error});
+         });
+       }
+       else {
+         //we dispatch an action indicating the the song has already been requested
+         let err = 'You have already requested this song.'
+         dispatch({type: 'ALREADY_REQUESTED', err});
+       }
+     })
+   .catch((error) => {
+     dispatch({type: 'SONG_REQUEST_ERROR', error});
+   })
+   .catch((error) => {
+     dispatch({type: 'GET_DOCUMENT_ERROR', error});
+   })
+  }
+}
 
 export const clearError = () => {
   return (dispatch, getState) => {
@@ -108,7 +120,7 @@ export const deleteNotifications = () => {
             //deleting the documents
             firestore.collection('notifications').doc(doc.id).delete()
               .then(() => {
-                console.log("document deleted");
+                dispatch({type: 'DELETE_NOTIF'});
               })
               .catch((error) => {
                 dispatch({type:'DELETE_NOTIF_ERROR', error});
@@ -125,73 +137,118 @@ export const deleteNotifications = () => {
   }
 }
 
-export const undoRequest = (songID, userID) => {
+export const undoRequest = (songID, userID, sessionID) => {
   return (dispatch, getState, {getFirestore}) => {
     //the database
     const firestore = getFirestore();
-    console.log(songID, userID);
-    //getting the song that had this songID
-    firestore.collection('songRequests').where("songID", "==", songID).get()
+    let numRequests = 0;
+    let docID = null;
+    let requestors = [];
+    let songIndex = null;
+    let songRequests = null;
+
+    firestore.collection('songRequestSessions').where("session.sessionID", "==", parseInt(sessionID)).get()
       .then((querySnapshot) => {
-        console.log(querySnapshot);
-        //there should be only 1 document but we use a forEach to access it
         querySnapshot.forEach((doc) => {
-          
-          //the docID will be used for update or delete
-          let docID = doc.id;
-
-          //if there is only 1 request we must delete the entry from the database
-          if(doc.data().numRequests === 1){
-            firestore.collection('songRequests').doc(docID).delete().then(() => {
-              dispatch({type: 'UNDO_SONG_REQUEST'});
-            }).catch(function(error) {
-              dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
-            });
+          let session = doc.data().session;
+          docID = doc.id;
+          //iterating through all the songRequests in the session
+          songRequests = session.songRequests;
+          songRequests.forEach((songRequest, index) => {
+          if(songRequest.songID === songID){
+            songIndex = index; //used to identify which index in the songRequests array the song is
+            numRequests = songRequest.numRequests;
+            requestors = songRequest.requestors;
           }
-
-          //if there are multiple requests we must remove one request and remove the user's ID from the requestors array
-          else{
-            firestore.collection('songRequests').doc(docID).update({
-              numRequests: doc.data().numRequests - 1,
-              requestors: doc.data().requestors.filter((requestor) => requestor !== userID)
-            }).then(() => {
-              //history.push("/");
-              dispatch({type: 'UNDO_SONG_REQUEST'});
-            }).catch((error) => {
-              dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
-            });
-          }
+          })
+        });
+      })
+      //the next step is to either remove the songRequest from the session.songRequests array (song has been requested once) or update the numRequests of the existing songRequest
+      .then(() => {
+        //if the numRequests is 0 then the song needs to be removed
+        if (numRequests === 1){
+        //removing the song request from the songRequests array that is a copy of the songRequests in the session doc in firestore
+        songRequests.splice(songIndex,1);
+        //updating the collection to reflect the change to the songRequests
+        firestore.collection('songRequestSessions').doc(docID).update({
+          "session.songRequests": songRequests
         })
+        .then(() => {
+            dispatch({type: 'UNDO_SONG_REQUEST'});
+          }).catch((error) => {
+            dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
+          });
+        }
+        //if the numRequests is > 0 then the song has already been requested
+        //and we must update the doc to reflect the new request as long as the user hasn't already requested the song
+        else{
+          //updating the numRequests
+          songRequests[songIndex].numRequests = numRequests - 1;
+          //removing the requestor ID from the list of requestors
+          songRequests[songIndex].requestors = requestors.filter(id => id !== userID);
+          firestore.collection('songRequestSessions').doc(docID).update({
+            "session.songRequests": songRequests
+          }).then(() => {
+            dispatch({type: 'UNDO_SONG_REQUEST'});
+          }).catch((error) => {
+            dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
+          });
+        }
       })
-      .catch((error) => {
-        dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error})
-      })
+    .catch((error) => {
+      dispatch({type: 'UNDO_SONG_REQUEST_ERROR', error});
+    })
+    .catch((error) => {
+      dispatch({type: 'GET_DOCUMENT_ERROR', error});
+    })
   }
 }
 
 //an action that will create a song request from the dashboard
-export const createSongRequestFromDashboard = (songID, userID) => {
+export const createSongRequestFromDashboard = (songID, userID, sessionID) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
+    
     const firestore = getFirestore();
-    firestore.collection('songRequests').where("songID", "==", songID).get()
-    .then((querySnapshot) => {
-      //there should be only 1 document but we use a forEach to access it
-      querySnapshot.forEach((doc) => {
-        
-        //the docID will be used for update or delete
-        let docID = doc.id;
-        firestore.collection('songRequests').doc(docID).update({
-          numRequests: doc.data().numRequests + 1,
-          requestors: [...doc.data().requestors, userID]
+    let numRequests = 0;
+    let docID = null;
+    let songIndex = null;
+    let songRequests = null;
+
+    firestore.collection('songRequestSessions').where("session.sessionID", "==", parseInt(sessionID)).get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          let session = doc.data().session;
+          docID = doc.id;
+          //iterating through all the songRequests in the session
+          songRequests = session.songRequests;
+          songRequests.forEach((songRequest, index) => {
+          if(songRequest.songID === songID){
+            songIndex = index; //used to identify which index in the songRequests array the song is
+            numRequests = songRequest.numRequests;
+          }
+          })
+        });
+      })
+      //the next step is to either remove the songRequest from the session.songRequests array (song has been requested once) or update the numRequests of the existing songRequest
+      .then(() => {
+        //updating the numRequests
+        songRequests[songIndex].numRequests = numRequests + 1;
+        //removing the requestor ID from the list of requestors
+        songRequests[songIndex].requestors.push(userID);
+        firestore.collection('songRequestSessions').doc(docID).update({
+          "session.songRequests": songRequests
         }).then(() => {
           dispatch({type: 'CREATE_SONG_REQUEST'});
         }).catch((error) => {
           dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
         });
       })
+    .catch((error) => {
+      dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error});
     })
     .catch((error) => {
-      dispatch({type: 'CREATE_SONG_REQUEST_ERROR', error})
+      dispatch({type: 'GET_DOCUMENT_ERROR', error});
     })
+    
   }
 }
