@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import About from './components/dashboard/About';
-import SongDetails from './components/songRequests/SongDetails';
 import SignIn from './components/auth/SignIn';
 import SignUp from './components/auth/SignUp';
 import RequestSong from './components/songRequests/RequestSong';
@@ -19,7 +18,6 @@ class App extends Component {
           <Switch>
             <Route exact path="/" component={Sessions}></Route>
             <Route path="/about" component={About}></Route>
-            <Route path="/song/:id" component={SongDetails}></Route>
             <Route path="/signin" component={SignIn}></Route>
             <Route path="/signup" component={SignUp}></Route>
             <Route path="/sessions" component={Sessions}></Route>

@@ -13,11 +13,17 @@ class SongRequestSummary extends Component {
     this.props.deleteNotifications();
   }
   render(){
-    const {auth, song} = this.props;
+    const {auth, song, creatorID} = this.props;
     return (
       <div className="song-with-album card" id={song.id} key={song.id}>
       <img src={song.albumIMGURL} alt="Album Cover"/>
       <div className="card-content">
+        {auth.uid === creatorID ? (
+              /*eventually add functionality that lets the creator remove song requests*/ null
+              ) : (
+                null
+              )
+            }
         <span className="card-title green-text">
         <a target="_blank" rel="noreferrer noopener" title="Play on Spotify" href={song.externalURL} className="green-text">{song.title}</a>
         </span>
@@ -25,12 +31,14 @@ class SongRequestSummary extends Component {
         <p className="black-text">
           <b>{song.numRequests === 1 ? (song.numRequests + " Request") : (song.numRequests + " Requests")}</b>
         </p>
-        {song.requestors.includes(auth.uid) ? (
-            <button onClick={this.handleClickUndo} id={song.songID} className="btn green lighten-1 z-depth-0">Undo Request</button>
-          ) : (
-            <button onClick={this.handleClickRequest} id={song.songID} className="btn green lighten-1 z-depth-0">Request Song</button> 
-          )
-        }
+        <div>
+          {song.requestors.includes(auth.uid) ? (
+              <button onClick={this.handleClickUndo} id={song.songID} className="btn red lighten-1 z-depth-0">Undo Request</button>
+            ) : (
+              <button onClick={this.handleClickRequest} id={song.songID} className="btn green lighten-1 z-depth-0">Request Song</button> 
+            )
+          }
+        </div>
       </div>
     </div>
     );

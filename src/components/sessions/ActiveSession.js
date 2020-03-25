@@ -32,13 +32,15 @@ class ActiveSession extends Component {
     const {songRequestSessions, sessionID} = this.props;
     if(isLoaded(songRequestSessions)){
       let songRequests = [];
+      let creatorID = null;
       for(let i in songRequestSessions){
         if(songRequestSessions[i].session.sessionID === parseInt(sessionID)){
           songRequests = songRequestSessions[i].session.songRequests;
+          creatorID = songRequestSessions[i].creatorID;
           break;
         }
       }
-      return songRequests;
+      return {songRequests, creatorID};
     }
   }
 
@@ -69,7 +71,7 @@ class ActiveSession extends Component {
           <div className="container">
             <div className="row">
               <div className="col s12 m6">
-                <SongRequestList sessionID={this.props.sessionID} songs={this.returnSongRequests()}/>
+                <SongRequestList sessionID={this.props.sessionID} songs={this.returnSongRequests().songRequests} creatorID={this.returnSongRequests().creatorID}/>
               </div>
               <div className="col s12 m5 offset-m1">
                 <Notifications notifications={notifications}/>
