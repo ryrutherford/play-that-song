@@ -8,8 +8,8 @@ const About = () => {
         <div className="card-content break-line">
           <p className="card-title green-text"><b>What is <i>Play That Song</i>?</b></p>
           <p className="black-text">
-            <i>Play That Song</i> is a website that allows users to create "Song Request Sessions"
-            where they can share a unique code that allows other users to add song requests to the session.
+            <i>Play That Song</i> is a website that lets the people who play the music know which songs the audience would like to hear.
+            Users can create "Song Request Sessions" where they can share a unique code that allows other users to add song requests to the session.
           </p>
         </div>
       </div>
@@ -17,7 +17,7 @@ const About = () => {
         <div className="card-content about">
           <p className="card-title green-text"><b>How does it work?</b></p>
           <p className="black-text">
-            Song requests are made by using the built in search functionality, integrated with the Spotify API
+            Once a Song Request Session is created, users with the unique code can make song requests by using the built in search functionality, integrated with the Spotify API
             to return live search results.
             <br/><br/>
             You must <u><b><Link to='/signup' className="green-text">create an account</Link></b></u> before you can use the app.
@@ -28,8 +28,7 @@ const About = () => {
         <div className="card-content about">
           <p className="card-title green-text"><b>What can I do with it?</b></p>
           <p className="black-text">
-            Users are allowed to request the same song at most once and can undo requests
-            once they've requested a song.
+            Next time you're hosting an event, party or hanging with friends create a Song Request Session so everyone can have a say in what music is played!
           </p>
         </div>
       </div>
