@@ -1,6 +1,7 @@
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 
+//functional component to display Signed Out Links in the navbar
 const SignedOutLinks = () => {
   return (
     <ul className="right">

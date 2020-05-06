@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
+//Functional component with hardcoded info about the website
 const About = () => {
   return (
     <div className="container">

@@ -1,14 +1,18 @@
 import React from 'react';
 import moment from 'moment';
 
+/*
+* Functional component which displays the latest notifications about song requests
+* the notifications are passed down through the props as a list
+* each notification is subsequently mapped to a presentable format
+*/
 const Notifications = (props) => {
   const {notifications} = props;
   return (
     <div className="section">
       <h3 className="green-text">Notifications</h3>
       <div className="card">
-        <div className="card-content">
-          
+        <div className="card-content">     
           <ul>
             {notifications && notifications.map((item) => {
               return (

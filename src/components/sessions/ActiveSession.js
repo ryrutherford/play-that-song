@@ -11,28 +11,49 @@ class ActiveSession extends Component {
   //this function checks whether the url entered (i.e. access code) exists or not
   //if it doesn't exist, the user is redirected to the sessions page
   isValidURL = () => {
+    /*
+    * songRequestSessions contains data corresponding to all active sessions
+    * sessionID corresponds to the sessionID entered (i.e. the sessionID in the URL)
+    */
     const {songRequestSessions, sessionID} = this.props;
+
     let sessionExists = false;
+    
+    //once the songRequestSessions have been loaded we can check if the sessionID exists
     if(isLoaded(songRequestSessions)){
+      
+      //checking if the sessionID exists
       for(let i in songRequestSessions){
         if(songRequestSessions[i].session.sessionID === parseInt(sessionID)){
           sessionExists = true;
           break;
         }
       }
+
       if(!sessionExists){
         return false;
       }
+
       return true;
     }
     return false;
   }
 
+  //a function that returns the song requests and creatorID for the corresponding song request session
+  //NOTE: I am currently not doing anything with the creatorID but I included it because it may come in handy if I want to add functionality
   returnSongRequests = () => {
+    /*
+    * songRequestSessions contains data corresponding to all active sessions
+    * sessionID corresponds to the sessionID entered (i.e. the sessionID in the URL)
+    */
     const {songRequestSessions, sessionID} = this.props;
+
+    //once the songRequestSessions have been loaded we can get the song requests for that session
     if(isLoaded(songRequestSessions)){
       let songRequests = [];
       let creatorID = null;
+
+      //retrieving the songRequests, and the creatorID of the songRequestSession
       for(let i in songRequestSessions){
         if(songRequestSessions[i].session.sessionID === parseInt(sessionID)){
           songRequests = songRequestSessions[i].session.songRequests;
@@ -45,13 +66,26 @@ class ActiveSession extends Component {
   }
 
   render() {
+    /*
+    * auth contains authentication data (UID in particular)
+    * notifications contains a list of the 10 most recent song request notifications from firestore
+    * songRequestSessions contains data corresponding to all active sessions (from firestore)
+    * sessionID corresponds to the sessionID entered (i.e. the sessionID in the URL)
+    */
     const {auth, notifications, sessionID, songRequestSessions} = this.props;
+
+    //if the user is not signed in => redirect to about page (home page)
     if(!auth.uid) {
       return <Redirect to='/about'/>
     }
+
+    //if the songRequestSessions have been loaded => we can check if the url is valid
+    //if the URL is NOT valid => we redirect the user to the sessions page
     if(isLoaded(songRequestSessions) && this.isValidURL() === false){
       return <Redirect to='/sessions'/>
     }
+
+    //if the songRequestSessions have been loaded => we display session info, song request info and notifications
     if(isLoaded(songRequestSessions))
       return (
         <div>
@@ -80,6 +114,7 @@ class ActiveSession extends Component {
           </div>
         </div>
       );
+      //display a loading circle while the songRequestSessions data is loading
       else {
         return (
           <center>
@@ -100,10 +135,11 @@ class ActiveSession extends Component {
   }
 }
 
+//selecting the auth data from firebase and notifications + songRequestSessions data from firestore
+//the sessionId comes from the ownProps (the session_id field of the URL)
 const mapStateToProps = (state, ownProps) => {
   let sessionID = ownProps.match.params.session_id;
   return {
-    //songs: state.firestore.ordered.songRequestSessions,
     auth: state.firebase.auth,
     notifications: state.firestore.ordered.notifications,
     songRequestSessions: state.firestore.data.songRequestSessions,

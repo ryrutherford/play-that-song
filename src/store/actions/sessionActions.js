@@ -1,6 +1,9 @@
+//action creator that creates a new song request session based on the creatorID (userID) and randomly generated sessionID
 export const createSession = (userID, sessionID) => {
   return (dispatch, getState, {getFirestore}) => {
     const firestore = getFirestore();
+
+    //adding the new session to firestore and dispatching a success, or failure action based on the result
     firestore.collection('songRequestSessions').add({
       creatorID: userID,
       session: {
@@ -17,11 +20,15 @@ export const createSession = (userID, sessionID) => {
   }
 }
 
-//action for deleting the session
+//action creator for deleting the session with corresponding sessionID
 export const deleteSession = (sessionID) => {
   return (dispatch, getState, {getFirestore}) => {
     const firestore = getFirestore();
+
+    //the sessionID must be converted to an int because that's the way it is represented in firestore
     sessionID = parseInt(sessionID, 10);
+
+    //deleting the session from firestore with the corresponding sessionID and dispatching a success/failur action based on the result
     firestore.collection('songRequestSessions').where("session.sessionID", "==", sessionID).get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {

@@ -1,3 +1,4 @@
+//initially the reqError will be null
 const initState = {
   reqError: null
 };

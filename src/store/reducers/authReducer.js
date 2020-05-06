@@ -1,3 +1,4 @@
+//initially the authError will be null
 const initState = {
   authError: null
 };

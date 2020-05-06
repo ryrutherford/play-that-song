@@ -3,6 +3,7 @@ import {NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {signOut} from '../../store/actions/authActions';
 
+//functional component to display signed in links and profile initials
 const SignedInLinks = (props) => {
   return (
     <ul className="right">
@@ -15,8 +16,13 @@ const SignedInLinks = (props) => {
   );
 }
 
+//mapping a signOut dispatch function to props
 const mapDispatchToProps = (dispatch) => {
   return {
+    /*
+    * when the user clicks on Sign Out the signOut action creator will be called which will call the firebase signOut function
+    * depending on the result of the firebase signOut a success or error action will be dispatched
+    */
     signOut: () => dispatch(signOut())
   }
 }

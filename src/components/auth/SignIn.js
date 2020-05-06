@@ -5,23 +5,32 @@ import {Redirect} from 'react-router-dom';
 
 class SignIn extends Component {
 
+  //state updates based on what is typed by the user in the email and password fields
   state = {
     email: '',
     password: ''
   }
 
+  //function called to update state when the user types in either the email or password field (represented by e.target.id)
   handleChange = (e) => {
     this.setState({
       [e.target.id]: e.target.value
     });
   }
 
+  //function called when the user submits the form
   handleSubmit = (e) => {
     e.preventDefault();
+    //calls the signIn function which will call the signIn action creator
+    //the signIn action creator will verify credentials with firebase and dispatch a Success or Error action accordingly
     this.props.signIn(this.state)
   }
+
   render() {
+    //authError will be empty unless the user submitted invalid credentials
     const {authError, auth} = this.props;
+
+    //if the user is already signed in, auth.uid will exist => redirect them to the home page => about page
     if(auth.uid) return <Redirect to="/"/>
     return (
       <div className="container">
@@ -47,6 +56,7 @@ class SignIn extends Component {
   }
 }
 
+//selecting the authError and auth data from the store
 const mapStateToProps = (state) => {
   return {
     authError: state.auth.authError,
@@ -54,8 +64,10 @@ const mapStateToProps = (state) => {
   }
 }
 
+//mapping a signIn dispatch function to props
 const mapDispatchToProps = (dispatch) => {
   return {
+    //forwarding the credentials to the signIn action creator
     signIn: (credentials) => dispatch(signIn(credentials)),
   }
 }
